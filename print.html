@@ -4,35 +4,45 @@
   <title>Auto Print PDFs</title>
 </head>
 <body>
-  <h2>Printing PDFs...</h2>
+  <h2>Auto Print PDFs</h2>
+  <button onclick="startPrinting()">Start Printing</button>
+
   <script>
-    async function printPDFs(urls) {
-      for (const url of urls) {
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
+    async function startPrinting() {
+      const params = new URLSearchParams(window.location.search);
+      const urlsParam = params.get("urls");
+
+      if (!urlsParam) {
+        alert("No PDF URLs provided in the query string.");
+        return;
+      }
+
+      const pdfUrls = urlsParam.split(",");
+
+      for (const url of pdfUrls) {
+        await printPDF(url);
+      }
+
+      alert("All PDFs sent to print.");
+    }
+
+    function printPDF(url) {
+      return new Promise((resolve) => {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
         iframe.src = url;
         document.body.appendChild(iframe);
 
-        await new Promise((resolve) => {
-          iframe.onload = () => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-            setTimeout(() => {
-              iframe.remove();
-              resolve();
-            }, 3000); // wait for print dialog
-          };
-        });
-      }
-    }
+        iframe.onload = function () {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
 
-    const params = new URLSearchParams(window.location.search);
-    const urlsParam = params.get("urls");
-    if (urlsParam) {
-      const pdfUrls = urlsParam.split(",");
-      printPDFs(pdfUrls);
-    } else {
-      document.body.innerHTML = "<p>No PDF URLs found in query string.</p>";
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            resolve();
+          }, 3000); // Wait 3 seconds for print dialog to appear
+        };
+      });
     }
   </script>
 </body>
