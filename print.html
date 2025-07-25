@@ -1,47 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auto Print PDFs</title>
+  <title>Print PDFs</title>
 </head>
 <body>
-  <h2>Auto Print PDFs</h2>
+  <h2>Click the button to print PDFs</h2>
   <button onclick="startPrinting()">Start Printing</button>
 
   <script>
-    async function startPrinting() {
+    function startPrinting() {
       const params = new URLSearchParams(window.location.search);
       const urlsParam = params.get("urls");
 
       if (!urlsParam) {
-        alert("No PDF URLs provided in the query string.");
+        alert("No PDFs provided.");
         return;
       }
 
       const pdfUrls = urlsParam.split(",");
 
-      for (const url of pdfUrls) {
-        await printPDF(url);
-      }
+      // Open each PDF in a new tab and trigger print
+      pdfUrls.forEach((url, index) => {
+        const newWindow = window.open(url, `_blank`);
 
-      alert("All PDFs sent to print.");
-    }
-
-    function printPDF(url) {
-      return new Promise((resolve) => {
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = url;
-        document.body.appendChild(iframe);
-
-        iframe.onload = function () {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
-
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-            resolve();
-          }, 3000); // Wait 3 seconds for print dialog to appear
-        };
+        // Trigger print after load (delay for safety)
+        const delay = 1000 + index * 4000; // stagger prints
+        setTimeout(() => {
+          if (newWindow) {
+            newWindow.focus();
+            newWindow.print();
+          }
+        }, delay);
       });
     }
   </script>
