@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Print PDFs</title>
+  <title>Auto Print PDFs</title>
 </head>
 <body>
-  <h2>Click the button to print PDFs</h2>
+  <h2>Auto Print PDFs</h2>
   <button onclick="startPrinting()">Start Printing</button>
 
   <script>
@@ -13,24 +13,31 @@
       const urlsParam = params.get("urls");
 
       if (!urlsParam) {
-        alert("No PDFs provided.");
+        alert("No PDF URLs provided.");
         return;
       }
 
-      const pdfUrls = urlsParam.split(",");
+      // Handle encoded commas or multiple PDFs
+      const decoded = decodeURIComponent(urlsParam);
+      const pdfUrls = decoded.split(",");
 
-      // Open each PDF in a new tab and trigger print
-      pdfUrls.forEach((url, index) => {
-        const newWindow = window.open(url, `_blank`);
+      let delay = 0;
 
-        // Trigger print after load (delay for safety)
-        const delay = 1000 + index * 4000; // stagger prints
+      pdfUrls.forEach((url) => {
+        const newTab = window.open(url, "_blank");
+
+        // Delay print to ensure the tab is fully loaded
         setTimeout(() => {
-          if (newWindow) {
-            newWindow.focus();
-            newWindow.print();
+          try {
+            newTab.focus();
+            newTab.print();
+          } catch (e) {
+            console.error("Print failed:", e);
           }
         }, delay);
+
+        // Stagger each print to avoid overlapping
+        delay += 5000;
       });
     }
   </script>
