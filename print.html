@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auto Print PDFs</title>
+</head>
+<body>
+  <h2>Printing PDFs...</h2>
+  <script>
+    async function printPDFs(urls) {
+      for (const url of urls) {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        await new Promise((resolve) => {
+          iframe.onload = () => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            setTimeout(() => {
+              iframe.remove();
+              resolve();
+            }, 3000); // wait for print dialog
+          };
+        });
+      }
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const urlsParam = params.get("urls");
+    if (urlsParam) {
+      const pdfUrls = urlsParam.split(",");
+      printPDFs(pdfUrls);
+    } else {
+      document.body.innerHTML = "<p>No PDF URLs found in query string.</p>";
+    }
+  </script>
+</body>
+</html>
